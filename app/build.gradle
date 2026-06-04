@@ -4,7 +4,7 @@ plugins {
 
 android {
     namespace 'com.example.dublispeed'
-    compileSdk 37
+    compileSdk 36
 
     defaultConfig {
         applicationId "com.example.dublispeed"
