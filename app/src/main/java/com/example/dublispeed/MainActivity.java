@@ -27,21 +27,29 @@ public class MainActivity extends AppCompatActivity {
         Context mContext;
         WebAppInterface(Context c) { mContext = c; }
 
-        @JavascriptInterface
+@JavascriptInterface
 public void runSpeedTest() {
     new Thread(() -> {
         try {
             long startTime = System.currentTimeMillis();
             java.net.URL url = new java.net.URL("https://speed.cloudflare.com/__down?bytes=5000000");
             java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
-            conn.getInputStream().readBytes(new byte[5000000]);
+
+            java.io.InputStream is = conn.getInputStream();
+            byte[] buffer = new byte[8192];
+            int bytesRead;
+            while ((bytesRead = is.read(buffer)) != -1) {
+            }
+            is.close();
+            
             long endTime = System.currentTimeMillis();
 
             double timeSeconds = (endTime - startTime) / 1000.0;
-            int mbps = (int) ((5 * 8) / timeSeconds);
+
+            final int mbps = (timeSeconds > 0) ? (int) ((5 * 8) / timeSeconds) : 0;
 
             myWebView.post(() -> {
-                myWebView.evaluateJavascript("updateSpeed('" + mbps + "')", null);
+                myWebView.evaluateJavascript("updateSpeed(" + mbps + ")", null);
             });
 
         } catch (Exception e) {
@@ -49,6 +57,7 @@ public void runSpeedTest() {
         }
     }).start();
 }
+
 @JavascriptInterface
 public void fixInternet() {
     myWebView.post(() -> {
