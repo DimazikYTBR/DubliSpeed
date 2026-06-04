@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DubliSpeed</title>
+    <style>
+        :root { --accent: #38bdf8; --bg: #0f172a; --surface: rgba(30, 41, 59, 0.6); }
+
+        body { background: var(--bg); color: #ffffff; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
+
+        .top-bar { width: 100%; display: flex; justify-content: center; align-items: center; gap: 30px; margin-top: 10px; }
+        .icon-btn { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); color: white; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; aspect-ratio: 1/1; }
+
+        .content-wrapper { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; }
+
+        #speedValue { font-size: 64px; font-weight: bold; color: var(--accent); }
+        #fixStatus { display: none; text-align: center; color: #94a3b8; }
+
+        .dock { background: var(--surface); padding: 10px; border-radius: 50px; display: flex; gap: 10px; backdrop-filter: blur(10px); margin-bottom: 20px; }
+        .action-btn { background: transparent; color: white; border: 1px solid rgba(56, 189, 248, 0.5); padding: 12px 25px; border-radius: 40px; cursor: pointer; }
+        .panel { display: none; position: absolute; top: 80px; width: 85%; background: #1e293b; padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 10; }
+    </style>
+</head>
+<body>
+
+    <header class="top-bar">
+        <button class="icon-btn" onclick="togglePanel('settingsPanel')">⚙️</button>
+        <h1 class="app-title">DubliSpeed</h1>
+        <button class="icon-btn" onclick="togglePanel('historyPanel')">📋</button>
+    </header>
+
+    <div class="content-wrapper">
+        <div id="mainContent">
+            <div id="speedValue">0 Mbps</div>
+        </div>
+        <div id="fixStatus">
+            <div style="font-size: 50px;">📱</div>
+            <div style="margin-top: 15px;">
+                <div>Загрузка: <span id="downSpeed">0</span> Mbps</div>
+                <div>Выгрузка: <span id="upSpeed">0</span> Mbps</div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="dock">
+        <button class="action-btn" onclick="requestSpeedTest()">SPEED TEST</button>
+        <button class="action-btn" onclick="fixInternet()">FIX INTERNET</button>
+    </nav>
+
+    <div id="historyPanel" class="panel"><h3>История</h3><ul id="historyList"></ul></div>
+    <div id="settingsPanel" class="panel"><h3>Цвет</h3><input type="color" onchange="changeColor(this.value)"></div>
+
+    <script>
+        function togglePanel(id) { let p = document.getElementById(id); p.style.display = (p.style.display === 'block') ? 'none' : 'block'; }
+        
+        function changeColor(color) { document.documentElement.style.setProperty('--accent', color); document.getElementById('speedValue').style.color = color; }
+
+        function requestSpeedTest() {
+            document.getElementById("mainContent").style.display = "block";
+            document.getElementById("fixStatus").style.display = "none";
+            if(typeof AndroidBridge !== "undefined") AndroidBridge.runSpeedTest();
+        }
+
+        function fixInternet() {
+            document.getElementById("mainContent").style.display = "none";
+            document.getElementById("fixStatus").style.display = "block";
+            if(typeof AndroidBridge !== "undefined") AndroidBridge.fixInternet();
+
+            setTimeout(() => {
+                document.getElementById("downSpeed").innerText = "45";
+                document.getElementById("upSpeed").innerText = "12";
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

@@ -1,87 +1,59 @@
 package com.example.dublispeed;
 
-import android.animation.ArgbEvaluator;
-import android.animation.ObjectAnimator;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
+import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
-import android.widget.Button;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
+import android.webkit.JavascriptInterface;
+import android.webkit.WebView;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
-    
-    private static final String TAG = "DubliSpeed";
-    private TextView speedValue;
-    private RelativeLayout rootLayout;
+    private WebView myWebView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        speedValue = findViewById(R.id.speedValue);
-        rootLayout = findViewById(R.id.rootLayout);
-        Button btnSpeedTest = findViewById(R.id.btnSpeedTest);
-        Button btnFixInternet = findViewById(R.id.btnFixInternet);
+        myWebView = findViewById(R.id.webView);
 
-        btnSpeedTest.setOnClickListener(v -> {
-            speedValue.setText("...");
-            startSpeedTest();
-        });
+        myWebView.getSettings().setJavaScriptEnabled(true);
 
-        btnFixInternet.setOnClickListener(v -> {
-            speedValue.setText("Fixing...");
-            updateBackground("GOOD");
-            Log.d(TAG, "Сеть оптимизирована");
-        });
-    }
-
-    private void startSpeedTest() {
-        new Thread(() -> {
-            try {
-                Thread.sleep(1500);
-                int randomSpeed = (int) (Math.random() * 290 + 10);
-                final String result = randomSpeed + " Mbps"; 
+        myWebView.addJavascriptInterface(new WebAppInterface(this), "AndroidBridge");
         
-                runOnUiThread(() -> {
-                    speedValue.setText(result);
-                    updateBackground(randomSpeed > 100 ? "GOOD" : "MEDIUM");
-                });
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }).start();
+        myWebView.loadUrl("file:///android_asset/index.html");
     }
 
-    public void updateBackground(String status) {
-        int colorFrom = Color.WHITE;
-        if (rootLayout.getBackground() instanceof ColorDrawable) {
-            colorFrom = ((ColorDrawable) rootLayout.getBackground()).getColor();
+    public class WebAppInterface {
+        Context mContext;
+        WebAppInterface(Context c) { mContext = c; }
+
+        @JavascriptInterface
+public void runSpeedTest() {
+    new Thread(() -> {
+        try {
+            long startTime = System.currentTimeMillis();
+            java.net.URL url = new java.net.URL("https://speed.cloudflare.com/__down?bytes=5000000");
+            java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
+            conn.getInputStream().readBytes(new byte[5000000]);
+            long endTime = System.currentTimeMillis();
+
+            double timeSeconds = (endTime - startTime) / 1000.0;
+            int mbps = (int) ((5 * 8) / timeSeconds);
+
+            myWebView.post(() -> {
+                myWebView.evaluateJavascript("updateSpeed('" + mbps + "')", null);
+            });
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
-        int colorTo;
-        switch (status) {
-            case "GOOD": colorTo = Color.WHITE; break;
-            case "MEDIUM": colorTo = Color.parseColor("#797979"); break;
-            case "LOST": colorTo = Color.parseColor("#8B0000"); break;
-            default: colorTo = Color.WHITE;
-        }
-
-        animateBackgroundColor(colorFrom, colorTo);
-    }
-
-    public void animateBackgroundColor(int fromColor, int toColor) {
-        ObjectAnimator colorAnimator = ObjectAnimator.ofObject(
-                rootLayout, 
-                "backgroundColor", 
-                new ArgbEvaluator(), 
-                fromColor, 
-                toColor
-        );
-        colorAnimator.setDuration(500);
-        colorAnimator.start();
+    }).start();
+}
+@JavascriptInterface
+public void fixInternet() {
+    myWebView.post(() -> {
+        mContext.startActivity(new android.content.Intent(android.provider.Settings.ACTION_WIFI_SETTINGS));
+    });
+}
     }
 }
