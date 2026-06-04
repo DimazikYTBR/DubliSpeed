@@ -1,3 +1,7 @@
-<style name="Theme.DubliSpeed" parent="Theme.AppCompat.Light.NoActionBar">
-    <item name="colorPrimary">@color/purple_500</item>
+<resources>
+    <style name="Theme.DubliSpeed" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/purple_500</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowActionBar">false</item>
     </style>
+</resources>
