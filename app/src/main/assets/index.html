@@ -62,6 +62,10 @@
             if(typeof AndroidBridge !== "undefined") AndroidBridge.runSpeedTest();
         }
 
+        function updateSpeed(val) {
+            document.getElementById("speedValue").innerText = val + " Mbps";
+        }
+
         function fixInternet() {
             document.getElementById("mainContent").style.display = "none";
             document.getElementById("fixStatus").style.display = "block";
