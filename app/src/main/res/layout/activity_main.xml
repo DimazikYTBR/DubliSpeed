@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rootLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF">
+
+    <include
+        android:id="@+id/speedometerPart"
+        layout="@layout/speedometer_layout" />
+
+    <include
+        android:id="@+id/capsulePart"
+        layout="@layout/capsule_layout" />
+
+</RelativeLayout>
