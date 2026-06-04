@@ -42,13 +42,13 @@ public class MainActivity extends AppCompatActivity {
     private void startSpeedTest() {
         new Thread(() -> {
             try {
-                Thread.sleep(2000);
-                final String result = "120 Mbps"; 
-            
+                Thread.sleep(1500);
+                int randomSpeed = (int) (Math.random() * 290 + 10);
+                final String result = randomSpeed + " Mbps"; 
+        
                 runOnUiThread(() -> {
-                    TextView speedValue = findViewById(R.id.speedValue);
                     speedValue.setText(result);
-                    updateBackground("GOOD"); 
+                    updateBackground(randomSpeed > 100 ? "GOOD" : "MEDIUM");
                 });
             } catch (InterruptedException e) {
                 e.printStackTrace();
